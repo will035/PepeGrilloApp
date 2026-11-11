@@ -1,0 +1,9 @@
+PepeGrillo para Linux x86-64
+
+Extrae el archivo completo y ejecuta ./pepe_grillo_app dentro de la carpeta.
+Conserva el ejecutable junto a lib/ y data/. Requiere un escritorio Linux con
+GTK 3 y bibliotecas compatibles con Ubuntu 24.04. El selector de archivos usa
+zenity, kdialog o qarma. La base de datos se crea fuera de esta carpeta.
+
+Al abrir una base de prueba de esquema 1 o 2, esta versión la reinicia.
+El esquema 3 conserva los datos al volver a abrir la aplicación.

@@ -1,0 +1,33 @@
+name: Publicar Linux
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [packaging/linux/version]
+permissions:
+  contents: write
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar herramientas
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libsqlite3-dev liblzma-dev
+          git clone --depth 1 --branch 3.44.8 https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - name: Validar, probar y empaquetar
+        run: |
+          set -eu
+          test "$(cat packaging/linux/version)" = "$(awk '$1 == "version:" {print $2}' pubspec.yaml)"
+          flutter pub get --enforce-lockfile
+          flutter analyze --no-pub
+          flutter test --no-pub
+          ./scripts/package-linux.sh
+      - name: Publicar paquete y suma SHA-256
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(cat packaging/linux/version)
+          gh release create "v$version" dist/*.tar.gz dist/*.sha256 --target "$GITHUB_SHA" --title "PepeGrillo $version" --notes 'MVP local en MXN. Paquete para Linux x86-64 compilado en Ubuntu 24.04. Descarga y extrae el archivo completo.'
